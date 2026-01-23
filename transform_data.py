@@ -25,17 +25,20 @@ class DataTransformer:
         spreadsheet_id (str): Google Sheets document ID
         value_columns (List[str]): List of value column names (Значення 1-10)
         base_columns (List[str]): List of base columns to preserve (Дата, Область, Місто, long, lat)
+        num_value_columns (int): Number of value columns (default: 10)
     """
     
-    def __init__(self, spreadsheet_id: str):
+    def __init__(self, spreadsheet_id: str, num_value_columns: int = 10):
         """
         Initialize the DataTransformer.
         
         Args:
             spreadsheet_id (str): Google Sheets document ID
+            num_value_columns (int): Number of value columns to process (default: 10)
         """
         self.spreadsheet_id = spreadsheet_id
-        self.value_columns = [f'Значення {i}' for i in range(1, 11)]
+        self.num_value_columns = num_value_columns
+        self.value_columns = [f'Значення {i}' for i in range(1, num_value_columns + 1)]
         self.base_columns = ['Дата', 'Область', 'Місто', 'long', 'lat']
         self.df = None
         
@@ -83,12 +86,13 @@ class DataTransformer:
         for col in self.value_columns:
             if col in row.index:
                 val = row[col]
-                # Handle various data types
+                # Handle various data types efficiently
                 if pd.isna(val):
                     values.append(0)
                 else:
                     try:
-                        values.append(int(float(val)))
+                        # Use pd.to_numeric for efficient conversion
+                        values.append(int(pd.to_numeric(val, errors='coerce') or 0))
                     except (ValueError, TypeError):
                         values.append(0)
             else:

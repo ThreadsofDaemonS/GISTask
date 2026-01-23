@@ -144,6 +144,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Project specific
+output/*.csv
+
 # Spyder project settings
 .spyderproject
 .spyproject

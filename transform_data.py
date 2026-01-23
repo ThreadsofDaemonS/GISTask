@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Optional, List
 import pandas as pd
 import numpy as np
-import gspread
 from dotenv import load_dotenv
 
 
@@ -53,21 +52,7 @@ class DataTransformer:
         try:
             print("🔄 Підключення до Google Sheets...")
             
-            # Create a gspread client (anonymous access for public sheets)
-            gc = gspread.service_account_from_dict({
-                "type": "service_account",
-                "project_id": "dummy",
-                "private_key_id": "dummy",
-                "private_key": "-----BEGIN PRIVATE KEY-----\nMIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEAwJbSK4pSVYO13H1I\nkU/7kCvIXqzOvR8W6FnJwKz3wRJkqFwvghQg5+OIFaULqZwbZ7mD15wPNKYxXo5D\nTgJuawIDAQABAkEAuWXA3b2FQND1TKMcYnxYJOkNfb8WFhxP2VfLq7zCM5lKGbxy\nvNNLAQR6YQJJ4VxIBWL8mGq7hPXCqGvXvDcKQQIhAO4a3m7x0RxE4U3K3ZlvTLkg\nULjWZ8Zw5J3qD3uUnNi5AiEAzf7TJVAiqCNGQU+9b2q9T/J0WyY6pVL3XsMHq9sZ\nLGsCIH5qVGYQHXjRUbQwNUJ6Kn/eDTM8B5VcGLVyH0HU3L8ZAiAQvN3Qkp3kGMmE\nsFHcFpVOQnLQP8mNkZyJ0zLXkPZU0QIgVlJr6L9KEPJCbDLZm2dJsHa/LW4Q0O8B\nV5UuGVTpZhk=\n-----END PRIVATE KEY-----\n",
-                "client_email": "dummy@dummy.iam.gserviceaccount.com",
-                "client_id": "dummy",
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dummy%40dummy.iam.gserviceaccount.com"
-            })
-            
-            # For public sheets, we can use the public URL
+            # For public sheets, we can use the public CSV export URL
             url = f"https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}/export?format=csv&gid=0"
             self.df = pd.read_csv(url)
             

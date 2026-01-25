@@ -206,7 +206,11 @@ class ArcGISUploader:
                         attributes[arcgis_field] = None
                     elif csv_field in ['long', 'lat']:
                         # Store coordinates as floats in attributes
-                        attributes[arcgis_field] = float(value)
+                        try:
+                            attributes[arcgis_field] = float(value)
+                        except (ValueError, TypeError):
+                            logger.warning(f"⚠️  Не вдалося конвертувати {csv_field}='{value}' в float, використано None")
+                            attributes[arcgis_field] = None
                     elif csv_field.startswith('Значення'):
                         # Safely convert to integer, handling potential errors
                         try:

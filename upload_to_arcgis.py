@@ -342,7 +342,7 @@ def main():
         item_id = validate_environment()
 
         # Get CSV path from environment or use default
-        csv_path = os.getenv('CSV_PATH', 'data/transformed_data.csv')
+        csv_path = os.getenv('CSV_PATH', 'output/transformed_data.csv')
         logger.info(f"CSV шлях: {csv_path}")
 
         # Create uploader instance

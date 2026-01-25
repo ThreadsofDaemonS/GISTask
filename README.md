@@ -36,7 +36,10 @@ GISTask/
 ├── .env                     # Реальні credentials (в .gitignore)
 ├── .gitignore              # Файли для ігнорування Git
 ├── requirements.txt         # Python залежності
-├── transform_data.py        # Основний скрипт трансформації
+├── transform_data.py        # Скрипт трансформації даних з Google Sheets
+├── upload_to_arcgis.py      # Скрипт завантаження даних в ArcGIS Online
+├── data/
+│   └── transformed_data.csv # Трансформовані дані для завантаження
 ├── output/
 │   └── transformed_data.csv # Результат трансформації (в .gitignore)
 └── README.md               # Цей файл
@@ -82,7 +85,11 @@ cp .env.sample .env
 Відредагуйте файл `.env` та додайте ID вашої Google таблиці:
 
 ```env
+# Google Sheets
 SPREADSHEET_ID=12846JbH2PwR0wN8eLVnosg4xujw-04gKyyD6RuElc-4
+
+# ArcGIS Online (опціонально, якщо ви хочете завантажувати дані)
+ARCGIS_ITEM_ID=your_arcgis_item_id_here
 ```
 
 > **Примітка:** SPREADSHEET_ID - це частина URL Google Sheets між `/d/` та `/edit`:
@@ -93,6 +100,7 @@ SPREADSHEET_ID=12846JbH2PwR0wN8eLVnosg4xujw-04gKyyD6RuElc-4
 - **pandas 2.1.4** - для роботи з табличними даними
 - **numpy 1.26.2** - для числових обчислень
 - **python-dotenv 1.0.0** - для роботи зі змінними середовища
+- **arcgis 2.2.0** - для роботи з ArcGIS Online (потрібно для upload_to_arcgis.py)
 
 > **Примітка:** Для доступу до публічних Google Sheets використовується прямий CSV export URL, тому не потрібні додаткові бібліотеки для автентифікації.
 
@@ -113,6 +121,45 @@ python test_transform.py
 ```
 
 Цей скрипт створює тестові дані і демонструє трансформацію без необхідності підключення до Google Sheets.
+
+### Завантаження даних в ArcGIS Online
+
+Після трансформації даних ви можете завантажити їх в ArcGIS Online Feature Layer:
+
+```bash
+python upload_to_arcgis.py
+```
+
+#### Налаштування для ArcGIS Online
+
+1. **Отримайте Item ID вашого Feature Layer:**
+   - Відкрийте ваш Feature Layer в ArcGIS Online
+   - Item ID знаходиться в URL: `https://www.arcgis.com/home/item.html?id=[ITEM_ID]`
+
+2. **Додайте Item ID в .env файл:**
+   ```env
+   ARCGIS_ITEM_ID=your_item_id_here
+   ```
+
+3. **Переконайтеся, що Feature Layer є публічним:**
+   - Скрипт використовує анонімне підключення `GIS()` без автентифікації
+   - Feature Layer повинен мати публічний доступ для читання та редагування
+
+#### Що робить скрипт upload_to_arcgis.py:
+
+- ✅ Читає `ARCGIS_ITEM_ID` з `.env` файлу
+- ✅ Підключається анонімно до ArcGIS Online (без автентифікації)
+- ✅ Завантажує дані з `data/transformed_data.csv`
+- ✅ Виконує маппінг полів CSV → ArcGIS:
+  - `Дата` → `d_date`
+  - `Область` → `t_region`
+  - `Місто` → `t_city`
+  - `Значення 1-10` → `i_value_1` - `i_value_10`
+  - `long` → `long`
+  - `lat` → `lat`
+- ✅ Створює features з геометрією Point (WGS84 координати)
+- ✅ Завантажує дані пакетами по 100 записів
+- ✅ Логує весь процес та виводить підсумки
 
 ### Очікуваний вивід
 

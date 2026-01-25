@@ -106,7 +106,7 @@ class FeatureLayerCleaner:
         Count the number of features in the layer.
 
         Returns:
-            int: Number of features, or 0 if error
+            int: Number of features
 
         Raises:
             RuntimeError: If counting fails

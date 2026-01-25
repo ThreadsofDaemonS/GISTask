@@ -39,6 +39,7 @@ class ArcGISUploader:
     """
 
     # Field mapping: CSV column -> ArcGIS field
+    # Note: long and lat are NOT included here as they are only used for geometry
     FIELD_MAPPING = {
         'Дата': 'd_date',
         'Область': 't_region',
@@ -52,9 +53,7 @@ class ArcGISUploader:
         'Значення 7': 'i_value_7',
         'Значення 8': 'i_value_8',
         'Значення 9': 'i_value_9',
-        'Значення 10': 'i_value_10',
-        'long': 'long',
-        'lat': 'lat'
+        'Значення 10': 'i_value_10'
     }
 
     def __init__(self, item_id: str, batch_size: int = 100):
@@ -137,8 +136,8 @@ class ArcGISUploader:
             df = pd.read_csv(csv_path, encoding='utf-8-sig')
             logger.info(f"✓ Завантажено {len(df)} рядків з CSV")
             
-            # Validate required columns
-            required_columns = list(self.FIELD_MAPPING.keys())
+            # Validate required columns (from FIELD_MAPPING + coordinates)
+            required_columns = list(self.FIELD_MAPPING.keys()) + ['long', 'lat']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
@@ -197,6 +196,7 @@ class ArcGISUploader:
                 }
                 
                 # Create attributes with field mapping
+                # Note: long and lat are NOT added to attributes - they are only used for geometry
                 attributes = {}
                 for csv_field, arcgis_field in self.FIELD_MAPPING.items():
                     value = row[csv_field]
@@ -204,8 +204,6 @@ class ArcGISUploader:
                     # Handle different data types
                     if pd.isna(value):
                         attributes[arcgis_field] = None
-                    elif csv_field in ['long', 'lat']:
-                        attributes[arcgis_field] = float(value)
                     elif csv_field.startswith('Значення'):
                         # Safely convert to integer, handling potential errors
                         try:

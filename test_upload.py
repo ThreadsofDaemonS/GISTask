@@ -42,9 +42,7 @@ def test_field_mapping():
         'Значення 7': 'i_value_7',
         'Значення 8': 'i_value_8',
         'Значення 9': 'i_value_9',
-        'Значення 10': 'i_value_10',
-        'long': 'long',
-        'lat': 'lat'
+        'Значення 10': 'i_value_10'
     }
     
     assert uploader.FIELD_MAPPING == expected_fields, "Field mapping mismatch"
@@ -117,8 +115,10 @@ def test_create_features():
     assert attributes['t_city'] == 'Київ', "Wrong city"
     assert attributes['i_value_1'] == 1, "Wrong value_1"
     assert attributes['i_value_2'] == 1, "Wrong value_2"
-    assert attributes['long'] == 30.5234, "Wrong long attribute"
-    assert attributes['lat'] == 50.4501, "Wrong lat attribute"
+    
+    # IMPORTANT: Verify that long and lat are NOT in attributes (only in geometry)
+    assert 'long' not in attributes, "Coordinate 'long' should not be in attributes"
+    assert 'lat' not in attributes, "Coordinate 'lat' should not be in attributes"
     
     print("✓ Feature creation test passed")
 

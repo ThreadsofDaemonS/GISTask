@@ -30,19 +30,21 @@ def test_field_mapping():
     uploader = ArcGISUploader(item_id="test_id")
     
     expected_fields = {
-        'Дата': 'd_date',
-        'Область': 't_region',
-        'Місто': 't_city',
-        'Значення 1': 'i_value_1',
-        'Значення 2': 'i_value_2',
-        'Значення 3': 'i_value_3',
-        'Значення 4': 'i_value_4',
-        'Значення 5': 'i_value_5',
-        'Значення 6': 'i_value_6',
-        'Значення 7': 'i_value_7',
-        'Значення 8': 'i_value_8',
-        'Значення 9': 'i_value_9',
-        'Значення 10': 'i_value_10'
+        'Дата': 'date_1',
+        'Область': 'Область',
+        'Місто': 'city',
+        'Значення 1': 'value_1',
+        'Значення 2': 'value_2',
+        'Значення 3': 'value_3',
+        'Значення 4': 'value_4',
+        'Значення 5': 'value_5',
+        'Значення 6': 'value_6',
+        'Значення 7': 'value_7',
+        'Значення 8': 'value_8',
+        'Значення 9': 'value_9',
+        'Значення 10': 'value_10',
+        'long': 'long',
+        'lat': 'lat'
     }
     
     assert uploader.FIELD_MAPPING == expected_fields, "Field mapping mismatch"
@@ -110,15 +112,17 @@ def test_create_features():
     
     # Check attributes
     attributes = feature['attributes']
-    assert attributes['d_date'] == '2024-01-01', "Wrong date"
-    assert attributes['t_region'] == 'Київська', "Wrong region"
-    assert attributes['t_city'] == 'Київ', "Wrong city"
-    assert attributes['i_value_1'] == 1, "Wrong value_1"
-    assert attributes['i_value_2'] == 1, "Wrong value_2"
+    assert attributes['date_1'] == '2024-01-01', "Wrong date"
+    assert attributes['Область'] == 'Київська', "Wrong region"
+    assert attributes['city'] == 'Київ', "Wrong city"
+    assert attributes['value_1'] == 1, "Wrong value_1"
+    assert attributes['value_2'] == 1, "Wrong value_2"
     
-    # IMPORTANT: Verify that long and lat are NOT in attributes (only in geometry)
-    assert 'long' not in attributes, "Coordinate 'long' should not be in attributes"
-    assert 'lat' not in attributes, "Coordinate 'lat' should not be in attributes"
+    # IMPORTANT: Verify that long and lat ARE in attributes (stored as separate fields)
+    assert 'long' in attributes, "Coordinate 'long' should be in attributes"
+    assert 'lat' in attributes, "Coordinate 'lat' should be in attributes"
+    assert attributes['long'] == 30.5234, "Wrong longitude in attributes"
+    assert attributes['lat'] == 50.4501, "Wrong latitude in attributes"
     
     print("✓ Feature creation test passed")
 

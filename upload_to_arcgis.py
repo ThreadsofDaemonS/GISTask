@@ -39,21 +39,22 @@ class ArcGISUploader:
     """
 
     # Field mapping: CSV column -> ArcGIS field
-    # Note: long and lat are NOT included here as they are only used for geometry
     FIELD_MAPPING = {
-        'Дата': 'd_date',
-        'Область': 't_region',
-        'Місто': 't_city',
-        'Значення 1': 'i_value_1',
-        'Значення 2': 'i_value_2',
-        'Значення 3': 'i_value_3',
-        'Значення 4': 'i_value_4',
-        'Значення 5': 'i_value_5',
-        'Значення 6': 'i_value_6',
-        'Значення 7': 'i_value_7',
-        'Значення 8': 'i_value_8',
-        'Значення 9': 'i_value_9',
-        'Значення 10': 'i_value_10'
+        'Дата': 'date_1',
+        'Область': 'Область',
+        'Місто': 'city',
+        'Значення 1': 'value_1',
+        'Значення 2': 'value_2',
+        'Значення 3': 'value_3',
+        'Значення 4': 'value_4',
+        'Значення 5': 'value_5',
+        'Значення 6': 'value_6',
+        'Значення 7': 'value_7',
+        'Значення 8': 'value_8',
+        'Значення 9': 'value_9',
+        'Значення 10': 'value_10',
+        'long': 'long',
+        'lat': 'lat'
     }
 
     def __init__(self, item_id: str, batch_size: int = 100):
@@ -196,7 +197,6 @@ class ArcGISUploader:
                 }
                 
                 # Create attributes with field mapping
-                # Note: long and lat are NOT added to attributes - they are only used for geometry
                 attributes = {}
                 for csv_field, arcgis_field in self.FIELD_MAPPING.items():
                     value = row[csv_field]
@@ -204,6 +204,9 @@ class ArcGISUploader:
                     # Handle different data types
                     if pd.isna(value):
                         attributes[arcgis_field] = None
+                    elif csv_field in ['long', 'lat']:
+                        # Store coordinates as floats in attributes
+                        attributes[arcgis_field] = float(value)
                     elif csv_field.startswith('Значення'):
                         # Safely convert to integer, handling potential errors
                         try:

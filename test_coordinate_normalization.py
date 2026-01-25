@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Test script for coordinate normalization in upload_to_arcgis.py
+Test script for coordinate validation in upload_to_arcgis.py
 
-This script tests that European decimal format (comma) is correctly
-converted to standard format (period) for coordinates.
+This script tests that coordinates are properly validated when they
+are already normalized (normalization happens in transform_data.py).
 """
 
 import sys
@@ -25,22 +25,22 @@ import pandas as pd
 
 
 def test_european_format_coordinates():
-    """Test that European format coordinates (comma as decimal) are normalized."""
-    print("Testing European format coordinate normalization...")
+    """Test that coordinates are validated (already normalized by transform_data.py)."""
+    print("Testing coordinate validation with already normalized data...")
     
     uploader = ArcGISUploader(item_id="test_id")
     
-    # Create test CSV with European format coordinates (comma as decimal separator)
-    # Note: In CSV, we need to quote values that contain commas to avoid CSV parsing issues
+    # Create test CSV with ALREADY NORMALIZED coordinates (standard format with period)
+    # Note: Normalization happens in transform_data.py, so CSV should already have periods
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv', encoding='utf-8-sig') as f:
         f.write("Дата,Область,Місто,Значення 1,Значення 2,Значення 3,Значення 4,Значення 5,Значення 6,Значення 7,Значення 8,Значення 9,Значення 10,long,lat\n")
-        f.write('2024-01-01,Київська,Київ,1,0,0,0,0,0,0,0,0,0,"30,7306393","50,4501234"\n')  # European format with comma (quoted)
-        f.write('2024-01-02,Львівська,Львів,1,0,0,0,0,0,0,0,0,0,"24,0297562","49,8383458"\n')  # European format with comma (quoted)
-        f.write("2024-01-03,Одеська,Одеса,1,0,0,0,0,0,0,0,0,0,30.7233,46.4825\n")  # Standard format with period
+        f.write('2024-01-01,Київська,Київ,1,0,0,0,0,0,0,0,0,0,30.7306393,50.4501234\n')  # Normalized format
+        f.write('2024-01-02,Львівська,Львів,1,0,0,0,0,0,0,0,0,0,24.0297562,49.8383458\n')  # Normalized format
+        f.write("2024-01-03,Одеська,Одеса,1,0,0,0,0,0,0,0,0,0,30.7233,46.4825\n")  # Normalized format
         temp_path = f.name
     
     try:
-        # Read and normalize data
+        # Read and validate data
         df = uploader.read_csv_data(temp_path)
         
         assert df is not None, "Failed to read CSV"
@@ -51,19 +51,16 @@ def test_european_format_coordinates():
         assert isinstance(df.iloc[0]['lat'], float), "Latitude not converted to float"
         
         # Check specific values are correctly parsed
-        # First row: "30,7306393" should become 30.7306393
         assert abs(df.iloc[0]['long'] - 30.7306393) < 0.0001, f"Expected 30.7306393, got {df.iloc[0]['long']}"
         assert abs(df.iloc[0]['lat'] - 50.4501234) < 0.0001, f"Expected 50.4501234, got {df.iloc[0]['lat']}"
         
-        # Second row: "24,0297562" should become 24.0297562
         assert abs(df.iloc[1]['long'] - 24.0297562) < 0.0001, f"Expected 24.0297562, got {df.iloc[1]['long']}"
         assert abs(df.iloc[1]['lat'] - 49.8383458) < 0.0001, f"Expected 49.8383458, got {df.iloc[1]['lat']}"
         
-        # Third row: "30.7233" should remain 30.7233
         assert abs(df.iloc[2]['long'] - 30.7233) < 0.0001, f"Expected 30.7233, got {df.iloc[2]['long']}"
         assert abs(df.iloc[2]['lat'] - 46.4825) < 0.0001, f"Expected 46.4825, got {df.iloc[2]['lat']}"
         
-        print("✓ European format coordinate normalization test passed")
+        print("✓ Coordinate validation test passed")
         
     finally:
         # Clean up
@@ -111,17 +108,16 @@ def test_create_features_with_normalized_coordinates():
     print("✓ Feature creation with normalized coordinates test passed")
 
 
-def test_mixed_format_csv():
-    """Test CSV with mixed format (some rows with comma, some with period)."""
-    print("\nTesting mixed format CSV...")
+def test_standard_format_csv():
+    """Test CSV with standard format (period as decimal separator)."""
+    print("\nTesting standard format CSV...")
     
     uploader = ArcGISUploader(item_id="test_id")
     
-    # Create test CSV with mixed format
-    # Note: Values with commas need to be quoted in CSV
+    # Create test CSV with standard format (already normalized)
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv', encoding='utf-8-sig') as f:
         f.write("Дата,Область,Місто,Значення 1,Значення 2,Значення 3,Значення 4,Значення 5,Значення 6,Значення 7,Значення 8,Значення 9,Значення 10,long,lat\n")
-        f.write('2024-01-01,Київська,Київ,1,0,0,0,0,0,0,0,0,0,"30,5234","50,4501"\n')    # Comma format (quoted)
+        f.write('2024-01-01,Київська,Київ,1,0,0,0,0,0,0,0,0,0,30.5234,50.4501\n')  # Period format
         f.write("2024-01-02,Львівська,Львів,1,0,0,0,0,0,0,0,0,0,24.0297,49.8383\n")  # Period format
         temp_path = f.name
     
@@ -139,7 +135,7 @@ def test_mixed_format_csv():
         assert abs(df.iloc[0]['long'] - 30.5234) < 0.0001, f"Expected 30.5234, got {df.iloc[0]['long']}"
         assert abs(df.iloc[1]['long'] - 24.0297) < 0.0001, f"Expected 24.0297, got {df.iloc[1]['long']}"
         
-        print("✓ Mixed format CSV test passed")
+        print("✓ Standard format CSV test passed")
         
     finally:
         Path(temp_path).unlink()
@@ -148,16 +144,18 @@ def test_mixed_format_csv():
 def main():
     """Run all tests."""
     print("=" * 60)
-    print("🧪 Testing Coordinate Normalization")
+    print("🧪 Testing Coordinate Validation in upload_to_arcgis.py")
     print("=" * 60)
+    print("Note: Coordinates are normalized in transform_data.py before CSV creation")
+    print()
     
     try:
         test_european_format_coordinates()
         test_create_features_with_normalized_coordinates()
-        test_mixed_format_csv()
+        test_standard_format_csv()
         
         print("\n" + "=" * 60)
-        print("✅ All coordinate normalization tests passed!")
+        print("✅ All coordinate validation tests passed!")
         print("=" * 60)
         
     except AssertionError as e:

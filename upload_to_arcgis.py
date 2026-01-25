@@ -147,14 +147,15 @@ class ArcGISUploader:
             
             logger.info("✓ Всі обов'язкові поля присутні")
             
-            # Нормалізація координат: заміна коми на крапку (європейський формат → стандартний формат)
-            logger.info("🔄 Нормалізація формату координат (кома → крапка)...")
+            # Координати мають бути вже нормалізовані в transform_data.py
+            logger.info("🔄 Перевірка формату координат...")
             try:
-                df['long'] = df['long'].astype(str).str.replace(',', '.').astype(float)
-                df['lat'] = df['lat'].astype(str).str.replace(',', '.').astype(float)
-                logger.info("✓ Координати успішно нормалізовано")
+                df['long'] = df['long'].astype(float)
+                df['lat'] = df['lat'].astype(float)
+                logger.info("✓ Координати валідні")
             except Exception as e:
-                logger.error(f"❌ Помилка при нормалізації координат: {str(e)}")
+                logger.error(f"❌ Координати мають невірний формат: {str(e)}")
+                logger.error("Переконайтеся, що координати нормалізовані при трансформації даних")
                 return None
             
             # Remove rows with empty coordinates

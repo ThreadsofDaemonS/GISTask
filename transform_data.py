@@ -59,6 +59,14 @@ class DataTransformer:
             self.df = pd.read_csv(url)
 
             print(f"✓ Завантажено {len(self.df)} рядків з Google Sheets")
+            
+            # Normalize coordinates: replace comma with dot (European format → standard format)
+            if 'long' in self.df.columns and 'lat' in self.df.columns:
+                print("🔄 Нормалізація координат (кома → крапка)...")
+                self.df['long'] = self.df['long'].astype(str).str.replace(',', '.').astype(float)
+                self.df['lat'] = self.df['lat'].astype(str).str.replace(',', '.').astype(float)
+                print("✓ Координати нормалізовано")
+            
             return self.df
 
         except Exception as e:

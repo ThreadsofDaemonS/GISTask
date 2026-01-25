@@ -98,6 +98,26 @@ def test_count_features():
     print("✓ Count features test passed")
 
 
+def test_count_features_error():
+    """Test counting features with error."""
+    print("\nTesting count features error handling...")
+    
+    cleaner = FeatureLayerCleaner(item_id="test_item_id")
+    
+    # Mock feature layer that raises an exception
+    mock_layer = MagicMock()
+    mock_layer.query.side_effect = Exception("Query failed")
+    cleaner.feature_layer = mock_layer
+    
+    try:
+        count = cleaner.count_features()
+        assert False, "Should have raised RuntimeError"
+    except RuntimeError as e:
+        assert "Failed to count features" in str(e)
+    
+    print("✓ Count features error handling test passed")
+
+
 def test_clear_all_features():
     """Test clearing all features."""
     print("\nTesting clear all features...")
@@ -201,6 +221,7 @@ def main():
         test_connect_anonymous()
         test_get_feature_layer()
         test_count_features()
+        test_count_features_error()
         test_clear_all_features()
         test_clear_feature_layer_empty()
         test_clear_feature_layer_with_confirmation()

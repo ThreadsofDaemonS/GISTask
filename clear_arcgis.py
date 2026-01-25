@@ -42,7 +42,12 @@ class FeatureLayerCleaner:
 
         Args:
             item_id (str): ArcGIS Online Item ID
+        
+        Raises:
+            ValueError: If item_id is empty or None
         """
+        if not item_id:
+            raise ValueError("item_id cannot be empty or None")
         self.item_id = item_id
         self.gis = None
         self.feature_layer = None
@@ -83,6 +88,10 @@ class FeatureLayerCleaner:
             logger.info(f"✓ Item знайдено: {item.title}")
             
             # Get the feature layer (first layer in the service)
+            if not item.layers:
+                logger.error("❌ Item не містить жодного Feature Layer")
+                return False
+            
             self.feature_layer = item.layers[0]
             logger.info(f"✓ Feature Layer отримано: {self.feature_layer.properties.name}")
             
@@ -97,7 +106,10 @@ class FeatureLayerCleaner:
         Count the number of features in the layer.
 
         Returns:
-            int: Number of features, or -1 if error
+            int: Number of features, or 0 if error
+
+        Raises:
+            RuntimeError: If counting fails
         """
         try:
             # Query all features to count them
@@ -105,7 +117,7 @@ class FeatureLayerCleaner:
             return result
         except Exception as e:
             logger.error(f"❌ Помилка при підрахунку записів: {str(e)}")
-            return -1
+            raise RuntimeError(f"Failed to count features: {str(e)}")
 
     def clear_all_features(self) -> dict:
         """
@@ -134,10 +146,10 @@ class FeatureLayerCleaner:
             bool: True if clearing successful, False otherwise
         """
         # Step 1: Count records before deletion
-        count_before = self.count_features()
-        
-        if count_before < 0:
-            logger.error("❌ Не вдалося підрахувати записи")
+        try:
+            count_before = self.count_features()
+        except RuntimeError as e:
+            logger.error(f"❌ Не вдалося підрахувати записи: {str(e)}")
             return False
         
         logger.info(f"Знайдено записів: {count_before}")
@@ -167,9 +179,9 @@ class FeatureLayerCleaner:
             logger.error(f"❌ Помилка при видаленні: {result['error']}")
             return False
         
-        if 'deleteResults' in result:
+        if 'deleteResults' in result and isinstance(result['deleteResults'], list):
             delete_results = result['deleteResults']
-            successful_deletes = sum(1 for r in delete_results if r.get('success', False))
+            successful_deletes = sum(1 for r in delete_results if isinstance(r, dict) and r.get('success', False))
             
             logger.info(f"✅ Успішно видалено: {successful_deletes} записів")
             
@@ -179,14 +191,15 @@ class FeatureLayerCleaner:
                 logger.warning(f"⚠️  Не вдалося видалити: {failed_deletes} записів")
         
         # Step 5: Count records after deletion
-        count_after = self.count_features()
-        
-        if count_after >= 0:
+        try:
+            count_after = self.count_features()
             logger.info(f"Залишилось записів: {count_after}")
             
             if count_after > 0:
                 logger.warning(f"⚠️  УВАГА: В Feature Layer залишилось {count_after} записів!")
                 return False
+        except RuntimeError as e:
+            logger.warning(f"⚠️  Не вдалося перевірити залишкові записи: {str(e)}")
         
         return True
 

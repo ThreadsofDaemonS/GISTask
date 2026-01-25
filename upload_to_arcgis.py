@@ -197,7 +197,12 @@ class ArcGISUploader:
                     elif csv_field in ['long', 'lat']:
                         attributes[arcgis_field] = float(value)
                     elif csv_field.startswith('Значення'):
-                        attributes[arcgis_field] = int(value) if not pd.isna(value) else 0
+                        # Safely convert to integer, handling potential errors
+                        try:
+                            attributes[arcgis_field] = int(float(value)) if not pd.isna(value) else 0
+                        except (ValueError, TypeError):
+                            logger.warning(f"⚠️  Не вдалося конвертувати {csv_field}='{value}' в integer, використано 0")
+                            attributes[arcgis_field] = 0
                     else:
                         attributes[arcgis_field] = str(value)
                 
@@ -336,8 +341,9 @@ def main():
         # Validate environment
         item_id = validate_environment()
 
-        # Define CSV path
-        csv_path = "data/transformed_data.csv"
+        # Get CSV path from environment or use default
+        csv_path = os.getenv('CSV_PATH', 'data/transformed_data.csv')
+        logger.info(f"CSV шлях: {csv_path}")
 
         # Create uploader instance
         uploader = ArcGISUploader(item_id)

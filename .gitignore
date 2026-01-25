@@ -146,6 +146,7 @@ venv.bak/
 
 # Project specific
 output/*.csv
+data/*.csv
 
 # Spyder project settings
 .spyderproject

@@ -90,7 +90,7 @@ cp .env.sample .env
 
 ```env
 # Google Sheets
-SPREADSHEET_ID=12846JbH2PwR0wN8eLVnosg4xujw-04gKyyD6RuElc-4
+SPREADSHEET_ID=your_google_spreadsheet_id_here
 
 # ArcGIS Online (опціонально, якщо ви хочете завантажувати дані)
 ARCGIS_ITEM_ID=your_arcgis_item_id_here
@@ -306,11 +306,18 @@ df = transformer.read_google_sheet()
 - ✅ Обробка некоректних значень в даних
 - ✅ Інформативні повідомлення про помилки
 
-## 🔗 Тестові дані
+## 🔗 Використання власних даних
 
-**Google Sheets:** [Відкрити таблицю](https://docs.google.com/spreadsheets/d/12846JbH2PwR0wN8eLVnosg4xujw-04gKyyD6RuElc-4/edit?gid=0#gid=0)
+Використовуйте власний документ Google Sheets.
 
-**SPREADSHEET_ID:** `12846JbH2PwR0wN8eLVnosg4xujw-04gKyyD6RuElc-4`
+**Як знайти SPREADSHEET_ID:**
+
+ID знаходиться в URL вашої таблиці:
+```
+https://docs.google.com/spreadsheets/d/[YOUR_SPREADSHEET_ID]/edit
+```
+
+Скопіюйте цей ID та додайте його до вашого файлу `.env`.
 
 ## 🔐 Безпека
 

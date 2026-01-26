@@ -1,5 +1,5 @@
 annotated-types==0.7.0
-arcgis==2.2.0
+arcgis==2.4.2
 cachetools==6.2.4
 certifi==2026.1.4
 cffi==2.0.0
@@ -37,6 +37,7 @@ numpy==2.4.1
 oauthlib==3.3.1
 packaging==26.0
 pandas==2.3.3
+pandas-stubs==2.3.3.260113
 partd==1.4.2
 pillow==12.1.0
 proto-plus==1.27.0
@@ -63,6 +64,7 @@ six==1.17.0
 toolz==1.1.0
 traitlets==5.14.3
 truststore==0.10.4
+types-pytz==2025.2.0.20251108
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.3
